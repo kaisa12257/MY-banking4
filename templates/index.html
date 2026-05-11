@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>my-Banking 💰</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <style>
+        /* 모든 모달(설정, 로그Q인 등)을 화면 정중앙에 배치 */
+        .modal {
+            display: none; 
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(3px);
+            z-index: 9999;
+            display: none; /* 기본은 숨김, 자바스크립트에서 flex로 변경 */
+            align-items: center;      
+            justify-content: center;   
+        }
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 320px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>💰 My-Banking <span id="userDisplayName"></span></h1>
+    <div id="authBox">
+        <button onclick="openModal('signupModal')" class="btn-auth">회원가입</button>
+        <button onclick="openModal('loginModal')" class="btn-auth login">로그인</button>
+    </div>
+    <div id="userMenu" style="display:none;">
+        <button onclick="openSettingsModal()" style="background:none; border:none; color:white; font-size:1.5rem; cursor:pointer; padding: 5px 10px;">⚙️</button>
+    </div>
+</header>
+
+<main>
+    <div id="welcomeCard" class="card welcome-banner animate-welcome" style="text-align: center; margin: 20px auto; max-width: 430px;">
+        <h2 style="color: var(--muted-pink); margin: 0; font-size: 1.25rem;">현명한 소비를 위한 발걸음!</h2>
+        <div class="image-container" style="margin: 20px 0;">
+            <img src="{{ url_for('static', filename='images/현명한소비 첫걸음.png') }}" 
+                 alt="현명한 소비" 
+                 style="width: 100%; max-width: 320px; height: auto; border-radius: 15px; display: block; margin: 0 auto; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+        </div>
+        <p style="font-size: 0.95rem; color: #666; font-weight: 500;">나만의 가계부로 스마트한 자산 관리를 시작해보세요.</p>
+    </div>
+
+    <nav id="topNav" style="display:none;">
+        <button onclick="showTab('record')" class="tab-btn active">📝 기록</button>
+        <button onclick="showTab('fixed')" class="tab-btn">💳 고정 지출</button>
+        <button onclick="showTab('calendar')" class="tab-btn">📅 달력</button>
+        <button onclick="showTab('stats')" class="tab-btn">📊 통계</button>
+        <button onclick="showTab('goal')" class="tab-btn">🐷 저축</button>
+    </nav>
+
+    <div id="mainContent" style="display:none; max-width: 460px; margin: 0 auto;">
+        
+        <section id="tab-record" class="tab-content">
+            <div class="card">
+                <h3>소비 기록</h3>
+                <input type="date" id="expDate" style="width:100%; margin-bottom:10px;">
+                <input type="number" id="amt" placeholder="금액 (원)">
+                <select id="cat" style="width:100%; margin:10px 0;">
+                    <option value="식비">🍱 식비</option>
+                    <option value="교통비">🚌 교통비</option>
+                    <option value="주거/통신">🏠 주거/통신</option>
+                    <option value="쇼핑/패션">🛍️ 쇼핑/패션</option>
+                    <option value="생활용품">🧻 생활용품</option>
+                    <option value="의료/건강">🏥 의료/건강</option>
+                    <option value="여가생활">🎬 여가생활</option>
+                    <option value="자기계발">📚 자기계발</option>
+                    <option value="기타">🎸 기타</option>
+                </select>
+                <input type="text" id="desc" placeholder="내용">
+                <button onclick="saveExp()" class="btn-save" style="margin-top:10px; width:100%;">저장하기</button>
+            </div>
+            <div id="listArea" class="card"></div>
+        </section>
+
+        <section id="tab-fixed" class="tab-content" style="display:none;">
+            <div class="card">
+                <h3>💰 월별 목표 예산 설정</h3>
+                <input type="month" id="budgetMonth">
+                <input type="number" id="monthlyBudget" placeholder="예산(원)" style="margin: 10px 0;">
+                <button onclick="saveBudget()" class="btn-save" style="width:100%;">예산 저장</button>
+            </div>
+            <div id="budgetListArea" class="card"></div>
+            <div class="card">
+                <h3>💳 고정 지출 등록</h3>
+                <input type="text" id="fixedDesc" placeholder="내역">
+                <input type="number" id="fixedAmt" placeholder="금액 (원)" style="margin: 10px 0;">
+                <input type="date" id="fixedDate">
+                <button onclick="saveFixedExp()" class="btn-save" style="margin-top:10px; width:100%;">등록하기</button>
+            </div>
+            <div id="fixedListArea" class="card"></div>
+        </section>
+
+        <section id="tab-calendar" class="tab-content" style="display:none;">
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <button onclick="changeMonth(-1)" class="btn-nav">◀</button>
+                    <h3 id="calTitle" style="margin:0;"></h3>
+                    <button onclick="changeMonth(1)" class="btn-nav">▶</button>
+                </div>
+                <div class="cal-summary-box card" style="box-shadow:none; border: 2px solid #eee; padding:10px; margin-bottom:10px;">
+                    <span style="font-size: 0.9rem;">💰 남은 사용액 : </span>
+                    <b id="remainingDisplay">0원</b>
+                </div>
+                <div id="calGrid" class="cal-grid"></div>
+            </div>
+        </section>
+
+        <section id="tab-stats" class="tab-content" style="display:none;">
+    <div id="animalCard" class="card" style="display:none;"></div>
+
+    <div class="card">
+        <canvas id="chartCanvas"></canvas>
+    </div>
+    </section>
+
+        <section id="tab-goal" class="tab-content" style="display:none;">
+            <div id="statusCard" class="card"></div>
+            <div class="card">
+                <h3>🐷 저축 및 인출</h3>
+                <input type="number" id="savAmt" placeholder="저축 금액 (원)">
+                <select id="savType" style="width:100%; margin:10px 0;">
+                    <option value="자유">🔓 자유 저축</option>
+                    <option value="고정">🔒 고정 저축</option>
+                </select>
+                <button onclick="saveSavings()" class="btn-save" style="width:100%; margin-bottom:10px;">저축 저장</button>
+                <hr>
+                <input type="number" id="withdrawAmt" placeholder="인출 금액" style="margin-top:10px;">
+                <input type="text" id="withdrawDesc" placeholder="인출 사유">
+                <button onclick="withdrawSavings()" style="background:#e74c3c !important; color:white; width:100%; border:none; padding:10px; border-radius:10px; margin-top:10px;">인출하기</button>
+            </div>
+            <div id="savListArea" class="card"></div>
+        </section>
+    </div>
+</main>
+
+<div id="loginModal" class="modal">
+    <div class="modal-content">
+        <h2>로그인</h2>
+        <input id="l_em" type="email" placeholder="이메일">
+        <input id="l_pw" type="password" placeholder="비밀번호">
+        <button onclick="doLogin()" class="btn-primary-modal">로그인</button>
+        <button onclick="closeModal('loginModal')" class="btn-close-modal">닫기</button>
+    </div>
+</div>
+
+<div id="signupModal" class="modal">
+    <div class="modal-content">
+        <h2>회원가입</h2>
+        <input id="s_nm" type="text" placeholder="이름">
+        <input id="s_em" type="email" placeholder="이메일">
+        <input id="s_pw" type="password" placeholder="비밀번호">
+        <input id="s_pw_re" type="password" placeholder="비밀번호 확인">
+        <button onclick="doSignup()" class="btn-primary-modal">가입하기</button>
+        <button onclick="closeModal('signupModal')" class="btn-close-modal">닫기</button>
+    </div>
+</div>
+
+<div id="settingsModal" class="modal">
+    <div class="modal-content">
+        <h2>⚙️ 설정</h2>
+        <div id="userInfoArea" style="text-align: left; background: #f9f9f9; padding: 15px; border-radius: 10px; margin-bottom: 20px; font-size: 0.9rem;"></div>
+        <button onclick="doLogout()" style="background:#e74c3c !important; color:white !important; width: 100%; border:none; padding:12px; border-radius:10px; font-weight:bold; margin-bottom:10px;">로그아웃</button>
+        <button onclick="confirmWithdrawal()" style="background:#95a5a6 !important; color:white !important; width: 100%; border:none; padding:12px; border-radius:10px; font-weight:bold;">회원 탈퇴</button>
+        <button onclick="closeModal('settingsModal')" style="margin-top:15px; background:none; border:none; color:gray; text-decoration:underline; cursor:pointer;">닫기</button>
+    </div>
+</div>
+
+<div id="detailModal" class="modal">
+    <div class="modal-content">
+        <h3 id="detailDate"></h3>
+        <div id="detailList" style="max-height: 300px; overflow-y: auto;"></div>
+        <button onclick="closeModal('detailModal')" class="btn-close-modal">닫기</button>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

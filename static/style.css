@@ -1,0 +1,319 @@
+:root {
+    /* 눈이 편안한 뮤트(Muted) 톤 팔레트 */
+    --muted-pink: #D8A7B1;    /* 차분한 핑크 */
+    --muted-purple: #B6A6CA;  /* 차분한 퍼플 */
+    --bg-soft: #F4F2F3;       /* 연그레이 배경 */
+    --text-main: #4A4A4A;     /* 진한 그레이 */
+    --white: #ffffff;
+    /* 달력 상태 색상 (뮤트 버전) */
+    --cal-blue: #7FB3D5;      /* 예산 내 (파랑) */
+    --cal-red: #E59995;       /* 예산 초과 (빨강) */
+}
+
+/* 1. 바디 레이아웃 및 중앙 정렬 */
+body {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+    background-color: var(--bg-soft);
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+    color: var(--text-main);
+    line-height: 1.5;
+}
+
+header {
+    width: 100%;
+    background: linear-gradient(135deg, var(--muted-pink), var(--muted-purple));
+    color: white;
+    padding: 15px 0;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    position: relative;
+}
+
+header h1 { font-size: 1.4rem; margin: 0; }
+
+/* 2. 첫 화면 환영 배너 및 애니메이션 */
+.welcome-banner {
+    margin-top: 30px;
+    width: 90%;
+    max-width: 430px;
+    border: 1px solid #eee;
+}
+
+.animate-welcome {
+    opacity: 0;
+    animation: fadeInSlideUp 1.2s ease-out forwards;
+}
+
+@keyframes fadeInSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 3. 설정(⚙️) 버튼 */
+#userMenu {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+#userMenu button {
+    background: transparent !important; 
+    color: white !important; 
+    border: none !important;
+    font-size: 1.5rem !important;
+    cursor: pointer;
+    padding: 5px 10px;
+    box-shadow: none !important;
+}
+
+/* 4. 통계 탭: 카드 가로 배치 및 중앙 정렬 */
+.stats-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: center; /* 가로 중앙 정렬 */
+    align-items: flex-start;
+    flex-wrap: wrap;         /* 화면 좁으면 자동으로 아래로 내려감 */
+    gap: 20px;               /* 카드 사이 간격 */
+    width: 100%;
+}
+
+.stats-container .card {
+    flex: 0 1 400px;         /* 카드가 너무 커지지 않게 최대 400px로 제한 */
+    margin-bottom: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 320px;        /* 최소 너비 */
+}
+
+.animal-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+/* 5. 메인 컨텐츠 영역 너비 제어 */
+#mainContent {
+    width: 100%;
+    max-width: 460px;        /* 기본 너비 (기록, 저축 등) */
+    padding: 20px 15px;
+    box-sizing: border-box;
+    transition: max-width 0.3s ease;
+}
+
+/* 통계 탭일 때만 메인 영역을 넓혀서 가로 배치를 여유 있게 함 */
+#mainContent:has(#tab-stats[style*="display: block"]) {
+    max-width: 900px;
+}
+
+.card {
+    background: var(--white);
+    padding: 20px;
+    border-radius: 18px;
+    margin-bottom: 18px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    text-align: center;
+}
+
+/* 6. 공통 버튼 스타일 */
+button, .btn-auth, .btn-save, .btn-primary-modal {
+    background-color: var(--muted-pink) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 10px !important;
+    padding: 10px 20px !important;
+    font-weight: 600 !important;
+    cursor: pointer;
+    font-size: 0.95rem !important;
+    transition: all 0.2s ease;
+}
+
+button:hover {
+    opacity: 0.85;
+    transform: translateY(-1px);
+}
+
+/* 7. 이미지 사이즈 최적화 */
+img {
+    display: block;
+    margin: 10px auto;
+    max-width: 100%;
+    height: auto;
+    border-radius: 15px;
+}
+
+/* 8. 입력창 및 선택창 디자인 */
+input, select {
+    width: 100%;
+    padding: 12px;
+    margin: 4px 0;
+    border: 1px solid #E0E0E0;
+    border-radius: 10px;
+    box-sizing: border-box;
+    font-size: 0.95rem;
+}
+
+input:focus, select:focus {
+    outline: none;
+    border-color: var(--muted-pink);
+}
+
+/* 9. 내비게이션 탭바 */
+#topNav {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    background: white;
+    border-bottom: 2px solid var(--muted-pink);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.tab-btn {
+    background: none !important;
+    color: #AAA !important;
+    padding: 15px 20px !important;
+    border: none !important;
+    border-radius: 0 !important;
+}
+
+.tab-btn.active {
+    color: var(--muted-pink) !important;
+    border-bottom: 4px solid var(--muted-pink) !important;
+}
+
+/* 10. 달력 스타일 */
+.cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background: #EEE;
+    border: 1px solid #EEE;
+}
+
+.cal-day {
+    background: white;
+    min-height: 65px;
+    padding: 5px;
+    font-size: 0.85rem;
+    position: relative;
+}
+
+.cal-amt {
+    font-size: 0.7rem;
+    font-weight: bold;
+    margin-top: 5px;
+    text-align: center;
+}
+
+/* 달력 금액 색상 강제 적용 */
+[style*="color: var(--success)"], [style*="color: blue"] { color: var(--cal-blue) !important; }
+[style*="color: var(--danger)"], [style*="color: red"] { color: var(--cal-red) !important; }
+
+/* 11. 모달 창 */
+.modal {
+    display: none; 
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.4); 
+    backdrop-filter: blur(3px);
+    z-index: 2000;
+    align-items: center; 
+    justify-content: center;
+}
+
+.modal-content {
+    background: white;
+    padding: 35px 25px;
+    border-radius: 25px;
+    width: 320px; 
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.btn-close-modal {
+    background: none !important;
+    color: #999 !important;
+    font-size: 0.85rem !important;
+    text-decoration: underline !important;
+    border: none !important;
+    margin-top: 15px;
+}
+
+/* 12. 모바일 대응 (화면이 좁아지면 세로로 전환) */
+@media (max-width: 650px) {
+    .stats-container {
+        flex-direction: column;
+        align-items: center;
+    }
+    .stats-container .card {
+        width: 100%;
+        max-width: 100%;
+    }
+    #mainContent {
+        max-width: 100%;
+    }
+}
+
+.animal-box{
+    display:flex;
+    align-items:center;
+    gap:15px;
+}
+
+.animal-box img{
+    width:90px;
+    height:90px;
+    object-fit:contain;
+}
+
+.animal-info{
+    flex:1;
+    text-align:left;
+}
+
+.animal-info h3{
+    margin:0 0 8px 0;
+    font-size:1rem;
+}
+
+.animal-info p{
+    margin:0;
+    color:#666;
+    font-size:.9rem;
+}
+
+.btn-delete-small {
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+    min-height: 18px;
+    padding: 0;
+    margin-left: 8px;
+    border: none;
+    border-radius: 4px;
+    background: transparent;
+    color: red;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
